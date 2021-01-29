@@ -1,0 +1,5 @@
+auth_credentials.py
+*.csv
+obs/
+__pycache__/
+.ipynb_checkpoints/
