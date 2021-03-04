@@ -15,6 +15,10 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
         self.sandbox_mode = sandbox_mode
         self._set_update_function()
     
+    @property 
+    def _datastream_type(self):
+        return type(self.datastream)
+
     def on_open(self):
         if self.sandbox_mode:
             self.url = 'wss://ws-feed-public.sandbox.pro.coinbase.com'
@@ -25,20 +29,26 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
     def _set_update_function(self):
         #print(type(self.datastream))
         if isinstance(self.datastream,Buffer):
-            print("Datastream of type: Buffer")
+            #print("Datastream of type: Buffer")
             self._updater_func = self._update_buffer
         
         elif isinstance(self.datastream,streamz.dataframe.DataFrame):
-            print("Datastream of type: Streaming DataFrame")
+            #print("Datastream of type: Streaming DataFrame")
             self._updater_func = self._update_stream_df
         
         elif isinstance(self.datastream,streamz.core.Stream):
-            print("Datastream of type: Stream")
+            #print("Datastream of type: Stream")
             self._updater_func = self._update_core_stream
         
+        elif isinstance(self.datastream, dict):
+            self._updater_func = self._update_dict
+        
         else:
-            print(f"Unsupported Datastream of type: {type(self.datastream)}")
+            print(f"Unsupported Datastream of type: {self._datastream_type}")
             self._updater_func = self._update_print
+            return
+
+        print(f"Datastream of type: {self._datastream_type}")
 
     def _update_print(self,**kwargs):
         price_val = kwargs.get('price',None)
@@ -69,6 +79,9 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
         time_val  = kwargs.get('time',None)
 
         self.datastream.emit([time_val,price_val])
+
+    def _update_dict(self,**kwargs):
+        self.datastream.update(kwargs)
 
     def on_message(self,msg):
         self.message_count += 1
