@@ -99,5 +99,8 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
     def on_close(self):
         print(f"<---Websocket connection closed--->\n\tTotal messages: {self.message_count}")
 
+    def is_connected(self):
+        return self.ws.connected    #ws is a variable defined in the parent class cbpro.WebsocketClient
+
 if __name__ == '__main__':
     print('Nothing to execute')
