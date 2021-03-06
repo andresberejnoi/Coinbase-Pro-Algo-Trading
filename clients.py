@@ -7,7 +7,7 @@ import streamz.dataframe
 
 from holoviews.streams import Pipe, Buffer
 
-class GraphicWebsocketClient(cbpro.WebsocketClient):
+class CBWebsocketClient(cbpro.WebsocketClient):
     CBPRO_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%fZ'   #this parses the string date returned by Coinbase Pro into a pandas datetime object
     def __init__(self,datastream=None,sandbox_mode=True,**kwargs):
         super().__init__(**kwargs)
@@ -81,7 +81,8 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
         self.datastream.emit([time_val,price_val])
 
     def _update_dict(self,**kwargs):
-        self.datastream.update(kwargs)
+        self.datastream['time'].append(kwargs.get('time'))
+        self.datastream['price'].append(kwargs.get('price'))
 
     def on_message(self,msg):
         self.message_count += 1
@@ -101,6 +102,12 @@ class GraphicWebsocketClient(cbpro.WebsocketClient):
 
     def is_connected(self):
         return self.ws.connected    #ws is a variable defined in the parent class cbpro.WebsocketClient
+
+class GraphicWebsocketClient(CBWebsocketClient):
+    def explanation(self):
+        print('This class is created to maintain backwards compatibility with my previous scripts')
+        print('However, the name GraphicWebsocketClient does really make sense, so I changed the official')
+        print('name of the class to CBWebsocketClient and created this child since I was too lazy to fix my code.')
 
 if __name__ == '__main__':
     print('Nothing to execute')
